@@ -70,15 +70,16 @@ class Net(nn.Module):
         x = x.view(-1, 10)
         return F.log_softmax(x, dim=1)
 
-use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
+# Replace CUDA device selection with CPU-only
+device = torch.device("cpu")
 model = Net().to(device)
 summary(model, input_size=(1, 1, 28, 28))
 
 torch.manual_seed(1)
 batch_size = 128
 
-kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+# Remove CUDA-specific kwargs
+kwargs = {'num_workers': 1}
 train_loader = torch.utils.data.DataLoader(
     datasets.MNIST('data', train=True, download=True,
                     transform=transforms.Compose([
@@ -98,7 +99,8 @@ test_loader = torch.utils.data.DataLoader(
 
 def train(model, device, train_loader, optimizer, epoch):
     model.train()
-    pbar = tqdm(train_loader)
+    # Use tqdm with leave=False to prevent multiple line outputs
+    pbar = tqdm(train_loader, leave=False)
     for batch_idx, (data, target) in enumerate(pbar):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
