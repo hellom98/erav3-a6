@@ -49,13 +49,18 @@ def run_tests():
     # Initialize model
     model = Net().to(device)
     
-    # Load trained model weights
+    # Load trained model weights with better error handling
+    model_path = 'model.pth'
+    if not os.path.exists(model_path):
+        print(f"Error: {model_path} not found. Please run train.py first.")
+        return 1
+    
     try:
-        model.load_state_dict(torch.load('model.pth', map_location=device))
-        print("Loaded trained model successfully")
-    except FileNotFoundError:
-        print("Error: model.pth not found. Please run train.py first.")
-        return
+        model.load_state_dict(torch.load(model_path, map_location=device))
+        print(f"Successfully loaded trained model from {model_path}")
+    except Exception as e:
+        print(f"Error loading model: {str(e)}")
+        return 1
 
     # Run tests
     results = []
